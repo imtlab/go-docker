@@ -1,0 +1,14 @@
+function golang_install() {
+  apt-get update
+  $minimal_apt_get_install $packages
+  rm -rf /var/lib/apt/lists/*
+  golang_DOWNLOAD_URL="https://dl.google.com/go/go${golang_VERSION}.src.tar.gz"
+	curl -fSL -o golang.tar.gz $golang_DOWNLOAD_URL
+	echo "$golang_DOWNLOAD_SHA256 golang.tar.gz" | sha256sum -c -
+  mkdir -p /usr/local/go
+  tar -zxf golang.tar.gz -C /usr/local/go --strip-components=1
+  rm -rf golang.tar.gz
+  cd /usr/local/go/src
+  ./make.bash
+  export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+}

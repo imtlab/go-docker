@@ -1,0 +1,61 @@
+image: docker:stable
+
+variables:
+  DOCKER_HOST: tcp://localhost:2375/
+  DOCKER_DRIVER: overlay2
+  NAME: imtlab/baseimage-golang
+  VERSION: "18.0.0"
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - push
+
+before_script:
+  - apk add --update alpine-sdk bash
+
+build-1.11.5:
+  stage: build
+  artifacts:
+   paths:
+    - build-1_11_5.tgz
+   expire_in: 1 day
+  script:
+    - make build_golang1115
+    - docker save $NAME:1.11.5-$VERSION | gzip > build-1_11_5.tgz
+
+build-1.12:
+  stage: build
+  artifacts:
+   paths:
+    - build-1_12.tgz
+   expire_in: 1 day
+  script:
+    - make build_golang112
+    - docker save $NAME:1.12-$VERSION | gzip > build-1_12.tgz
+
+test-all:
+  stage: test
+  script:
+    - gunzip -c build-1_11_5.tgz | docker load 
+    - gunzip -c build-1_12.tgz   | docker load
+    - make test
+  dependencies:
+    - build-1.11.5
+    - build-1.12
+
+push-all:
+  stage: push
+  only:
+    - tags
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - gunzip -c build-1_11_5.tgz | docker load 
+    - gunzip -c build-1_12.tgz   | docker load
+    - make release
+  dependencies:
+    - build-1.11.5
+    - build-1.12
