@@ -16,47 +16,24 @@ stages:
 before_script:
   - apk add --update alpine-sdk bash
 
-build-1.11.5:
+build-1.13:
   stage: build
   artifacts:
    paths:
-    - build-1_11_5.tgz
+    - build-1_13.tgz
    expire_in: 1 day
   script:
-    - make build_golang1115
-    - docker save $NAME:1.11.5-$VERSION | gzip > build-1_11_5.tgz
+    - make build_golang113
+    - docker save $NAME:1.13-$VERSION | gzip > build-1_13.tgz
 
-build-1.12:
-  stage: build
-  artifacts:
-   paths:
-    - build-1_12.tgz
-   expire_in: 1 day
-  script:
-    - make build_golang112
-    - docker save $NAME:1.12-$VERSION | gzip > build-1_12.tgz
-
-build-1.12.8:
-  stage: build
-  artifacts:
-   paths:
-    - build-1_12_8.tgz
-   expire_in: 1 day
-  script:
-    - make build_golang1128
-    - docker save $NAME:1.12.8-$VERSION | gzip > build-1_12_8.tgz
 
 test-all:
   stage: test
   script:
-    - gunzip -c build-1_11_5.tgz | docker load 
-    - gunzip -c build-1_12.tgz   | docker load
-    - gunzip -c build-1_12_8.tgz | docker load
+    - gunzip -c build-1_13.tgz   | docker load
     - make test
   dependencies:
-    - build-1.11.5
-    - build-1.12
-    - build-1.12.8
+    - build-1.13
 
 push-all:
   stage: push
@@ -64,11 +41,7 @@ push-all:
     - tags
   script:
     - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-    - gunzip -c build-1_11_5.tgz | docker load 
-    - gunzip -c build-1_12.tgz   | docker load
-    - gunzip -c build-1_12_8.tgz | docker load
+    - gunzip -c build-1_13.tgz   | docker load
     - make release
   dependencies:
-    - build-1.11.5
-    - build-1.12
-    - build-1.12.8
+    - build-1.13

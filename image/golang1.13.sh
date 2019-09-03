@@ -5,7 +5,7 @@ source /golang_build/golang_prep.sh
 source /golang_build/golang_install
 set -x
 
-golang_VERSION=1.11.5
-golang_DOWNLOAD_SHA256=bc1ef02bb1668835db1390a2e478dcbccb5dd16911691af9d75184bbe5aa943e
+golang_VERSION=1.13
+golang_DOWNLOAD_SHA256=3fc0b8b6101d42efd7da1da3029c0a13f22079c0c37ef9730209d8ec665bf122
 
 golang_install
